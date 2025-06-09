@@ -1,62 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Input Matriks Keputusan TOPSIS</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Langkah 2: Input Nilai Alternatif</title>
     <script src="https://cdn.tailwindcss.com"></script>
-  </head>
-  <body class="bg-gray-100 p-8">
+</head>
+<body class="bg-gray-100 p-8">
     <div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
-      <h1 class="text-2xl font-bold mb-4">Langkah 2: Input Nilai Alternatif</h1>
-      <p class="mb-4 text-gray-600">
-        Masukkan nilai untuk setiap alternatif berdasarkan kriteria yang ada.
-      </p>
-
-      <form method="post">
-        {% csrf_token %}
-        <div class="overflow-x-auto">
-          <table class="min-w-full bg-white border">
-            <thead class="bg-gray-200">
-              <tr>
-                <th class="py-2 px-4 border">Alternatif</th>
-                {% for kriteria in kriteria_list %}
-                <th class="py-2 px-4 border">
-                  {{ kriteria.nama_kriteria }}
-                  ({{kriteria.get_atribut_display}})
-                </th>
-                {% endfor %}
-              </tr>
-            </thead>
-            <tbody>
-              {% for alternatif in alternatif_list %}
-              <tr>
-                <td class="py-2 px-4 border font-semibold bg-gray-200">
-                  {{ alternatif.nama_alternatif }}
-                </td>
-                {% for kriteria in kriteria_list %}
-                <td class="py-2 px-4 border">
-                  <input
-                    type="number"
-                    step="any"
-                    name="rating_{{ alternatif.id }}_{{ kriteria.id }}"
-                    class="w-full p-1 border rounded"
-                    required
-                  />
-                </td>
-                {% endfor %}
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-        <button
-          type="submit"
-          class="mt-6 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-        >
-          Lihat Hasil Peringkat
-        </button>
-      </form>
+        <h1 class="text-2xl font-bold mb-2">Langkah 2: Input Nilai Alternatif</h1>
+        <p class="mb-6 text-gray-600">Masukkan nilai untuk setiap alternatif berdasarkan kriteria yang ada (misal: untuk biaya, masukkan angka biayanya; untuk kinerja, masukkan skor 1-100, dll).</p>
+        
+        <form method="post" id="topsis-form">
+            {% csrf_token %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white border">
+                    <thead class="bg-gray-200">
+                        <tr>
+                            <th class="py-2 px-4 border">Alternatif</th>
+                            {% for kriteria in kriteria_list %}
+                                <th class="py-2 px-4 border">{{ kriteria.nama_kriteria }} ({{kriteria.get_atribut_display}})</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for alternatif in alternatif_list %}
+                        <tr>
+                            <td class="py-2 px-4 border font-semibold bg-gray-200">{{ alternatif.nama_alternatif }}</td>
+                            {% for kriteria in kriteria_list %}
+                                <td class="py-2 px-4 border">
+                                    <input type="number" step="any" name="rating_{{ alternatif.id }}_{{ kriteria.id }}" class="w-full p-1 border rounded" required>
+                                </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <button type="submit" id="submit-button" class="mt-6 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+                Lihat Hasil Peringkat
+            </button>
+        </form>
     </div>
-  </body>
+    
+    <script>
+        const topsisForm = document.getElementById('topsis-form');
+        topsisForm.addEventListener('submit', function() {
+            const submitButton = document.getElementById('submit-button');
+            submitButton.disabled = true;
+            submitButton.classList.remove('hover:bg-green-700');
+            submitButton.classList.add('bg-green-300');
+            submitButton.innerHTML = `
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 inline-block text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Memproses...
+            `;
+        });
+    </script>
+</body>
 </html>

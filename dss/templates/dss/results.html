@@ -1,54 +1,133 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Hasil Peringkat CloudRank-DSS</title>
     <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 p-8">
-    <div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-md">
-        <h1 class="text-3xl font-bold mb-4 text-center text-gray-800">🏆 Hasil Akhir Peringkat 🏆</h1>
-        <p class="mb-6 text-center text-gray-600">Berikut adalah peringkat platform cloud terbaik berdasarkan kriteria Anda.</p>
-        
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
+      <h1 class="text-3xl font-bold mb-4 text-center text-gray-800">
+        🏆 Hasil Akhir Peringkat 🏆
+      </h1>
+      <p class="mb-6 text-center text-gray-600">
+        Berikut adalah peringkat platform cloud terbaik berdasarkan kriteria
+        Anda.
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
         <div class="overflow-hidden border border-gray-200 rounded-lg">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Peringkat</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Platform Cloud</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Skor Preferensi</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    {% for alternative, score in final_results %}
-                    <tr class="{% if forloop.first %}bg-yellow-50{% endif %}">
-                        
-                        <td class="px-6 py-4 whitespace-nowrap text-lg font-bold text-gray-800">
-                            {% if forloop.first %}
-                                🥇 <span class="ml-2">1</span>
-                            {% elif forloop.counter == 2 %}
-                                🥈 <span class="ml-2">2</span>
-                            {% elif forloop.counter == 3 %}
-                                🥉 <span class="ml-2">3</span>
-                            {% else %}
-                                <span class="ml-2">{{ forloop.counter }}</span>
-                            {% endif %}
-                        </td>
-                        
-                        <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{{ alternative }}</td>
-                        
-                        <td class="px-6 py-4 whitespace-nowrap text-gray-700">{{ score|floatformat:4 }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th
+                  scope="col"
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Peringkat
+                </th>
+                <th
+                  scope="col"
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Platform
+                </th>
+                <th
+                  scope="col"
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Skor
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              {% for alternative, score in final_results %}
+              <tr class="{% if forloop.first %}bg-yellow-50{% endif %}">
+                <td
+                  class="px-6 py-4 whitespace-nowrap text-lg font-bold text-gray-800"
+                >
+                  {% if forloop.first %}🥇{% elif forloop.counter == 2 %}🥈{%
+                  elif forloop.counter == 3 %}🥉{% else %}{{ forloop.counter
+                  }}{% endif %}
+                </td>
+                <td
+                  class="px-6 py-4 whitespace-nowrap font-medium text-gray-900"
+                >
+                  {{ alternative }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-gray-700">
+                  {{ score|floatformat:4 }}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
-        <div class="text-center mt-6">
-            <a href="{% url 'home' %}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
-                Mulai Lagi
-            </a>
+
+        <div class="bg-gray-50 p-4 rounded-lg border">
+          <h2 class="text-lg font-semibold text-center mb-4 text-gray-700">
+            Visualisasi Skor
+          </h2>
+          <canvas id="resultsChart"></canvas>
+          <script id="chart-labels" type="application/json">{{ chart_labels|safe }}</script>
+          <script id="chart-data" type="application/json">{{ chart_data|safe }}</script>
         </div>
+      </div>
+
+      <div class="text-center mt-8">
+        <a
+          href="{% url 'home' %}"
+          class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300"
+        >
+          Mulai Lagi
+        </a>
+      </div>
     </div>
-</body>
+      // Ambil data dari context Django
+      const labels = JSON.parse(document.getElementById('chart-labels').textContent);
+      const data = JSON.parse(document.getElementById('chart-data').textContent);
+      const labels = {{ chart_labels|safe }};
+      const data = {{ chart_data|safe }};
+
+      const ctx = document.getElementById('resultsChart').getContext('2d');
+      new Chart(ctx, {
+          type: 'bar', // Tipe grafik
+          data: {
+              labels: labels,
+              datasets: [{
+                  label: 'Skor Preferensi',
+                  data: data,
+                  backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                  borderColor: 'rgba(54, 162, 235, 1)',
+                  borderWidth: 1
+              }]
+          },
+          options: {
+              indexAxis: 'y', // Membuat grafik menjadi bar horizontal
+              scales: {
+                  x: {
+                      beginAtZero: true,
+                      max: 1 // Skor TOPSIS selalu antara 0 dan 1
+                  }
+              },
+              plugins: {
+                  legend: {
+                      display: false // Sembunyikan legenda karena sudah jelas
+                  },
+                  tooltip: {
+                      callbacks: {
+                          label: function(context) {
+                              return `Skor: ${context.raw.toFixed(4)}`;
+                          }
+                      }
+                  }
+              },
+              responsive: true,
+              maintainAspectRatio: true
+          }
+      });
+    </script>
+  </body>
 </html>

@@ -1,16 +1,23 @@
-# dss/views.py
-
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpRequest, HttpResponse
 from .models import Kriteria, Alternatif
 from .logic.ahp_calculator import calculate_ahp
 from .logic.topsis_calculator import calculate_topsis
+from .models import Kriteria, Alternatif
+from .forms import KriteriaForm
 import numpy as np
 
 def home_view(request):
-    """View sederhana untuk homepage."""
-    # Di masa depan, ini bisa menjadi dashboard utama
-    return redirect('ahp_matrix')
+    """
+    Menampilkan halaman dashboard utama sebagai pusat navigasi.
+    """
+    kriteria_count = Kriteria.objects.count()
+    alternatif_count = Alternatif.objects.count()
+    context = {
+        'kriteria_count': kriteria_count,
+        'alternatif_count': alternatif_count,
+    }
+    return render(request, 'dss/home_dashboard.html', context)
 
 
 def ahp_view(request: HttpRequest) -> HttpResponse:
@@ -89,25 +96,118 @@ def topsis_input_view(request: HttpRequest) -> HttpResponse:
 
 def topsis_results_view(request: HttpRequest) -> HttpResponse:
     """
-    Menampilkan hasil akhir perankingan TOPSIS.
+    Menampilkan hasil akhir perankingan TOPSIS beserta grafiknya.
     """
     results_data = request.session.get('topsis_results', None)
 
     if not results_data:
-        # Jika tidak ada data di session, arahkan kembali ke awal
         return redirect('home')
 
-    # Gabungkan nama alternatif dengan skornya dan urutkan
     scores = results_data['scores']
     alternatives = results_data['alternatives']
     
-    final_results = sorted(zip(alternatives, scores), key=lambda x: x[1], reverse=True)
+    # Gabungkan nama alternatif dengan skornya
+    combined_results = zip(alternatives, scores)
+    
+    # Urutkan berdasarkan skor, dari tertinggi ke terendah
+    # Kita perlu mengurutkan di sini SEBELUM memisahkannya untuk grafik
+    final_results = sorted(combined_results, key=lambda x: x[1], reverse=True)
+
+    # ✨ BAGIAN BARU: Siapkan data khusus untuk Chart.js ✨
+    # Balikkan urutan agar di grafik bar horizontal, yang teratas adalah yang terbaik
+    chart_labels = [result[0] for result in reversed(final_results)]
+    chart_data = [result[1] for result in reversed(final_results)]
 
     context = {
-        'final_results': final_results
+        'final_results': final_results,
+        'chart_labels': chart_labels, # Kirim daftar label ke template
+        'chart_data': chart_data,   # Kirim daftar data skor ke template
     }
     
-    # Hapus data dari session setelah ditampilkan
-    del request.session['topsis_results']
+    # Hapus data dari session setelah digunakan
+    if 'topsis_results' in request.session:
+        del request.session['topsis_results']
 
     return render(request, 'dss/results.html', context)
+
+def kriteria_list_view(request):
+    """
+    Menampilkan daftar semua kriteria yang ada di database.
+    """
+    semua_kriteria = Kriteria.objects.all().order_by('id')
+    context = {
+        'semua_kriteria': semua_kriteria,
+    }
+    return render(request, 'dss/kriteria_list.html', context)
+
+
+def kriteria_create_view(request):
+    """
+    Menangani pembuatan kriteria baru.
+    GET: Menampilkan form kosong.
+    POST: Memproses data form dan menyimpan.
+    """
+    form = KriteriaForm(request.POST or None)
+    if request.method == 'POST':
+        if form.is_valid():
+            form.save()
+            return redirect('kriteria_list')
+
+    context = {
+        'form': form,
+        'page_title': 'Tambah Kriteria Baru'
+    }
+    return render(request, 'dss/kriteria_form.html', context)
+
+
+def kriteria_update_view(request, pk):
+    """
+    Menangani pembaruan kriteria yang sudah ada.
+    """
+    # Ambil objek kriteria berdasarkan pk, atau tampilkan 404 jika tidak ada
+    kriteria_obj = get_object_or_404(Kriteria, pk=pk)
+
+    # `instance=kriteria_obj` akan mengisi form dengan data yang ada
+    form = KriteriaForm(request.POST or None, instance=kriteria_obj)
+    
+    if request.method == 'POST':
+        if form.is_valid():
+            form.save()
+            return redirect('kriteria_list')
+
+    context = {
+        'form': form,
+        'page_title': f'Edit Kriteria: {kriteria_obj.nama_kriteria}'
+    }
+    return render(request, 'dss/kriteria_form.html', context)
+
+def kriteria_delete_view(request, pk):
+    """
+    Menangani penghapusan kriteria.
+    GET: Menampilkan halaman konfirmasi.
+    POST: Melakukan penghapusan dan redirect.
+    """
+    kriteria_obj = get_object_or_404(Kriteria, pk=pk)
+
+    if request.method == 'POST':
+        # Jika user mengkonfirmasi (mengirim form), hapus objek
+        kriteria_obj.delete()
+        # Arahkan kembali ke daftar kriteria
+        return redirect('kriteria_list')
+
+    context = {
+        'kriteria': kriteria_obj
+    }
+    # Jika GET, tampilkan halaman konfirmasi
+    return render(request, 'dss/kriteria_confirm_delete.html', context)
+
+def alternatif_list_view(request):
+    """
+    Menampilkan daftar semua alternatif yang ada di database.
+    """
+    semua_alternatif = Alternatif.objects.all().order_by('id')
+    context = {
+        'semua_alternatif': semua_alternatif,
+    }
+    return render(request, 'dss/alternatif_list.html', context)
+

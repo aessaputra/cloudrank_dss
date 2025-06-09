@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Manajemen Kriteria</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+      <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">Manajemen Kriteria</h1>
+        <div>
+          <a
+            href="{% url 'kriteria_create' %}"
+            class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300"
+          >
+            + Tambah Kriteria Baru
+          </a>
+        </div>
+      </div>
+
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  ID
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Nama Kriteria
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Atribut
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Bobot (AHP)
+                </th>
+                <th
+                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Aksi
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              {% for kriteria in semua_kriteria %}
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {{ kriteria.id }}
+                </td>
+                <td
+                  class="px-6 py-4 whitespace-nowrap font-medium text-gray-900"
+                >
+                  {{ kriteria.nama_kriteria }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  {% if kriteria.atribut == 'benefit' %}
+                  <span
+                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800"
+                  >
+                    Benefit
+                  </span>
+                  {% else %}
+                  <span
+                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800"
+                  >
+                    Cost
+                  </span>
+                  {% endif %}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {{ kriteria.bobot|floatformat:4 }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <a
+                    href="{% url 'kriteria_update' pk=kriteria.pk %}"
+                    class="text-indigo-600 hover:text-indigo-900"
+                    >Edit</a
+                  >
+                  <a
+                    href="{% url 'kriteria_delete' pk=kriteria.pk %}"
+                    class="text-red-600 hover:text-red-900 ml-4"
+                    >Hapus</a
+                  >
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="5" class="text-center py-10 text-gray-500">
+                  Belum ada kriteria. Silakan tambahkan kriteria baru.
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="text-center mt-6">
+        <a
+          href="{% url 'home' %}"
+          class="text-blue-600 hover:text-blue-800 transition duration-300"
+          >&larr; Kembali ke Proses AHP</a
+        >
+      </div>
+    </div>
+  </body>
+</html>

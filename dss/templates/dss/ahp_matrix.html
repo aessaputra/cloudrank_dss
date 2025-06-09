@@ -1,101 +1,101 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pembobotan Kriteria AHP</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Langkah 1: Pembobotan Kriteria AHP</title>
     <script src="https://cdn.tailwindcss.com"></script>
-  </head>
-  <body class="bg-gray-100 p-8">
+</head>
+<body class="bg-gray-100 p-8">
     <div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
-      <h1 class="text-2xl font-bold mb-4">Pembobotan Kriteria (AHP)</h1>
-      <p class="mb-4 text-gray-600">
-        Pilih seberapa penting satu kriteria dibandingkan dengan kriteria
-        lainnya.
-      </p>
-
-      {% if error_message %}
-      <div
-        class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4"
-        role="alert"
-      >
-        <strong class="font-bold">Error!</strong>
-        <span class="block sm:inline">{{ error_message }}</span>
-      </div>
-      {% endif %} {% if kriteria_list and kriteria_list|length >= 2 %}
-      <form method="post">
-        {% csrf_token %}
-        <div class="overflow-x-auto">
-          <table class="min-w-full bg-white border">
-            <thead class="bg-gray-200">
-              <tr>
-                <th class="py-2 px-4 border">Kriteria</th>
-                {% for kriteria in kriteria_list %}
-                <th class="py-2 px-4 border">{{ kriteria.nama_kriteria }}</th>
-                {% endfor %}
-              </tr>
-            </thead>
-            <tbody>
-              {% for row_kriteria in kriteria_list %}
-              <tr>
-                <td class="py-2 px-4 border font-semibold bg-gray-200">
-                  {{ row_kriteria.nama_kriteria }}
-                </td>
-                {% for col_kriteria in kriteria_list %}
-                <td class="py-2 px-4 border">
-                  {% if forloop.counter0 == forloop.parentloop.counter0 %}
-                  <input
-                    type="number"
-                    value="1"
-                    class="w-full p-1 border rounded bg-gray-200"
-                    readonly
-                  />
-                  {% elif forloop.counter0 < forloop.parentloop.counter0 %}
-                  <input
-                    type="number"
-                    step="any"
-                    value="1"
-                    id="matrix_{{ forloop.parentloop.counter0 }}_{{ forloop.counter0 }}"
-                    name="matrix_{{ forloop.parentloop.counter0 }}_{{ forloop.counter0 }}"
-                    class="w-full p-1 border rounded"
-                    oninput="updateReciprocal(this)"
-                  />
-                  {% else %}
-                  <input
-                    type="number"
-                    value="1"
-                    id="matrix_{{ forloop.parentloop.counter0 }}_{{ forloop.counter0 }}"
-                    class="w-full p-1 border rounded bg-gray-200"
-                    readonly
-                  />
-                  {% endif %}
-                </td>
-                {% endfor %}
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+        <h1 class="text-2xl font-bold mb-2">Langkah 1: Pembobotan Kriteria (AHP)</h1>
+        <p class="mb-4 text-gray-600">Pilih seberapa penting satu kriteria dibandingkan dengan kriteria lainnya.</p>
+        
+        <div class="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg relative mb-6" role="alert">
+            <h3 class="font-bold">💡 Cara Mengisi:</h3>
+            <ul class="list-disc list-inside mt-2 text-sm">
+                <li>Gunakan skala <strong>1 sampai 9</strong> untuk menentukan tingkat kepentingan.</li>
+                <li><strong>1</strong>: Kedua kriteria sama pentingnya.</li>
+                <li><strong>9</strong>: Kriteria pada baris jauh lebih penting daripada kriteria pada kolom.</li>
+                <li>Nilai di bawah diagonal akan terisi otomatis.</li>
+            </ul>
         </div>
-        <button
-          type="submit"
-          class="mt-6 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-        >
-          Hitung Bobot
-        </button>
-      </form>
-      {% endif %}
+
+        {% if error_message %}
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                <strong class="font-bold">Error!</strong>
+                <span class="block sm:inline">{{ error_message }}</span>
+            </div>
+        {% endif %}
+
+        {% if kriteria_list and kriteria_list|length >= 2 %}
+        <form method="post" id="ahp-form">
+            {% csrf_token %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white border">
+                    <thead class="bg-gray-200">
+                        <tr>
+                            <th class="py-2 px-4 border">Kriteria</th>
+                            {% for kriteria in kriteria_list %}
+                                <th class="py-2 px-4 border">{{ kriteria.nama_kriteria }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row_kriteria in kriteria_list %}
+                        <tr>
+                            <td class="py-2 px-4 border font-semibold bg-gray-200">{{ row_kriteria.nama_kriteria }}</td>
+                            {% for col_kriteria in kriteria_list %}
+                                <td class="py-2 px-4 border">
+                                    {% if forloop.counter0 == forloop.parentloop.counter0 %}
+                                        <input type="number" value="1" class="w-full p-1 border rounded bg-gray-200" readonly>
+                                    {% elif forloop.counter0 < forloop.parentloop.counter0 %}
+                                        <input type="number" step="any" value="1" id="matrix_{{ forloop.parentloop.counter0 }}_{{ forloop.counter0 }}" name="matrix_{{ forloop.parentloop.counter0 }}_{{ forloop.counter0 }}" class="w-full p-1 border rounded" oninput="updateReciprocal(this)" min="1" max="9">
+                                    {% else %}
+                                        <input type="number" value="1" id="matrix_{{ forloop.parentloop.counter0 }}_{{ forloop.counter0 }}" class="w-full p-1 border rounded bg-gray-200" readonly>
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <button type="submit" id="submit-button" class="mt-6 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+                Hitung Bobot & Lanjut
+            </button>
+        </form>
+        {% endif %}
     </div>
 
     <script>
-      function updateReciprocal(input) {
-        const i = input.id.split('_')[1];
-        const j = input.id.split('_')[2];
-        const reciprocalInput = document.getElementById(`matrix_${j}_${i}`);
-
-        if (reciprocalInput && parseFloat(input.value) !== 0) {
-          reciprocalInput.value = 1 / parseFloat(input.value);
+        function updateReciprocal(input) {
+            const i = input.id.split('_')[1];
+            const j = input.id.split('_')[2];
+            const reciprocalInput = document.getElementById(`matrix_${j}_${i}`);
+            
+            if (reciprocalInput && parseFloat(input.value) !== 0) {
+                reciprocalInput.value = (1 / parseFloat(input.value)).toFixed(3);
+            }
         }
-      }
+        
+        // ===============================================
+        // ✨ BAGIAN BARU: SCRIPT UNTUK LOADING INDICATOR ✨
+        // ===============================================
+        const ahpForm = document.getElementById('ahp-form');
+        ahpForm.addEventListener('submit', function() {
+            const submitButton = document.getElementById('submit-button');
+            submitButton.disabled = true;
+            submitButton.classList.remove('hover:bg-blue-700');
+            submitButton.classList.add('bg-blue-300');
+            submitButton.innerHTML = `
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 inline-block text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Menghitung...
+            `;
+        });
     </script>
-  </body>
+</body>
 </html>
