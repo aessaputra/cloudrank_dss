@@ -4,7 +4,7 @@ from .models import Kriteria, Alternatif
 from .logic.ahp_calculator import calculate_ahp
 from .logic.topsis_calculator import calculate_topsis
 from .models import Kriteria, Alternatif
-from .forms import KriteriaForm
+from .forms import KriteriaForm, AlternatifForm
 import numpy as np
 
 def home_view(request):
@@ -210,4 +210,20 @@ def alternatif_list_view(request):
         'semua_alternatif': semua_alternatif,
     }
     return render(request, 'dss/alternatif_list.html', context)
+
+def alternatif_create_view(request):
+    """
+    Menangani pembuatan alternatif baru.
+    """
+    form = AlternatifForm(request.POST or None)
+    if request.method == 'POST':
+        if form.is_valid():
+            form.save()
+            return redirect('alternatif_list')
+
+    context = {
+        'form': form,
+        'page_title': 'Tambah Alternatif Baru'
+    }
+    return render(request, 'dss/alternatif_form.html', context)
 

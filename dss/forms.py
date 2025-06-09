@@ -1,5 +1,5 @@
 from django import forms
-from .models import Kriteria
+from .models import Kriteria, Alternatif
 
 class KriteriaForm(forms.ModelForm):
     class Meta:
@@ -19,4 +19,18 @@ class KriteriaForm(forms.ModelForm):
         labels = {
             'nama_kriteria': 'Nama Kriteria',
             'atribut': 'Tipe Atribut',
+        }
+
+class AlternatifForm(forms.ModelForm):
+    class Meta:
+        model = Alternatif
+        fields = ['nama_alternatif']
+        widgets = {
+            'nama_alternatif': forms.TextInput(attrs={
+                'class': 'w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500',
+                'placeholder': 'Contoh: Amazon Web Services, Azure, GCP'
+            }),
+        }
+        labels = {
+            'nama_alternatif': 'Nama Alternatif',
         }

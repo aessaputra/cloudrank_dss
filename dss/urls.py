@@ -11,4 +11,5 @@ urlpatterns = [
     path('kriteria/edit/<int:pk>/', views.kriteria_update_view, name='kriteria_update'),
     path('kriteria/hapus/<int:pk>/', views.kriteria_delete_view, name='kriteria_delete'),
     path('alternatif/', views.alternatif_list_view, name='alternatif_list'),
+    path('alternatif/tambah/', views.alternatif_create_view, name='alternatif_create'),
 ]
