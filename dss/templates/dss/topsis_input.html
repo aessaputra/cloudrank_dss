@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Input Matriks Keputusan TOPSIS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
+      <h1 class="text-2xl font-bold mb-4">Langkah 2: Input Nilai Alternatif</h1>
+      <p class="mb-4 text-gray-600">
+        Masukkan nilai untuk setiap alternatif berdasarkan kriteria yang ada.
+      </p>
+
+      <form method="post">
+        {% csrf_token %}
+        <div class="overflow-x-auto">
+          <table class="min-w-full bg-white border">
+            <thead class="bg-gray-200">
+              <tr>
+                <th class="py-2 px-4 border">Alternatif</th>
+                {% for kriteria in kriteria_list %}
+                <th class="py-2 px-4 border">
+                  {{ kriteria.nama_kriteria }}
+                  ({{kriteria.get_atribut_display}})
+                </th>
+                {% endfor %}
+              </tr>
+            </thead>
+            <tbody>
+              {% for alternatif in alternatif_list %}
+              <tr>
+                <td class="py-2 px-4 border font-semibold bg-gray-200">
+                  {{ alternatif.nama_alternatif }}
+                </td>
+                {% for kriteria in kriteria_list %}
+                <td class="py-2 px-4 border">
+                  <input
+                    type="number"
+                    step="any"
+                    name="rating_{{ alternatif.id }}_{{ kriteria.id }}"
+                    class="w-full p-1 border rounded"
+                    required
+                  />
+                </td>
+                {% endfor %}
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <button
+          type="submit"
+          class="mt-6 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Lihat Hasil Peringkat
+        </button>
+      </form>
+    </div>
+  </body>
+</html>
